@@ -3,6 +3,7 @@ use std::str;
 use std::time::Instant;
 
 fn main() {
+    println!("STILL IN TESTING!");
     unlock();
     let now = Instant::now();
 

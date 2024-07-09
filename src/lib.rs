@@ -33,6 +33,25 @@ pub fn parse_items(objects: Vec<&str>) -> Vec<Vec<String>> {
     parsed
 }
 
+fn clean_string(input: String) -> String {
+    if input.starts_with("\"") {
+        if input.ends_with(",") {
+            input
+                .strip_prefix("\"")
+                .unwrap()
+                .strip_suffix("\",")
+                .unwrap();
+        } else {
+            input
+                .strip_prefix("\"")
+                .unwrap()
+                .strip_suffix("\"")
+                .unwrap();
+        }
+    }
+    input.trim().to_string()
+}
+
 pub fn build_item(object: Vec<String>) -> Item {
     let mut name = "";
     let mut user = "";

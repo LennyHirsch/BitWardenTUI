@@ -3,7 +3,16 @@ use std::env::set_var;
 use std::process::{Command, Stdio};
 use std::str;
 
+pub enum CurrentScreen {
+    Login,
+    Main,
+}
+
 pub struct App {
+    pub pass_input: String,
+    pub clean_input: String,
+    pub unlocked: bool,
+    pub current_screen: CurrentScreen,
     pub accounts: Vec<Account>,
     pub selected: usize,
     pub active_account: Option<Account>,
@@ -18,19 +27,43 @@ pub struct Account {
     pub pass: Option<String>,
 }
 
-impl Account {
-    fn get_pass(self) -> Option<String> {
-        self.pass
-    }
-}
-
 impl App {
     pub fn new() -> App {
         App {
+            pass_input: "".to_string(),
+            clean_input: "".to_string(),
+            unlocked: false,
+            current_screen: CurrentScreen::Login,
             accounts: vec![],
             selected: 0,
             active_account: None,
         }
+    }
+
+    pub fn unlock(&mut self) {
+        set_var("BW_PASSWORD", &self.pass_input);
+
+        let output = Command::new("bw")
+            .arg("unlock")
+            .arg("--passwordenv")
+            .arg("BW_PASSWORD")
+            .output()
+            .expect("Failed to unlock");
+
+        let result: Vec<&str> = str::from_utf8(&output.stdout)
+            .expect("Failed to get output as string")
+            .split("\n")
+            .collect::<Vec<&str>>()
+            .into_iter()
+            .filter(|line| line.contains("export"))
+            .collect();
+
+        let key: Vec<_> = result[0].split("\"").collect();
+        set_var("BW_SESSION", key[1]);
+        // TODO: CLEAR ENVIRONMENT VARIABLE
+        // TODO: ZEROIZE PASSWORD
+        self.unlocked = true;
+        self.current_screen = CurrentScreen::Main;
     }
 
     pub fn fetch_items(&mut self, accounts: Vec<Account>) {
@@ -40,32 +73,6 @@ impl App {
     pub fn update_active_account(&mut self, index: usize) {
         self.active_account = Some(get_account(&self.accounts[index].id)); // TODO: FIX THIS!
     }
-}
-
-pub fn unlock() {
-    println!("Enter password: ");
-    let pass = read_password().expect("Failed to get password");
-    set_var("BW_PASSWORD", pass);
-
-    let output = Command::new("bw")
-        .arg("unlock")
-        .arg("--passwordenv")
-        .arg("BW_PASSWORD")
-        .output()
-        .expect("Failed to unlock");
-
-    let result: Vec<&str> = str::from_utf8(&output.stdout)
-        .expect("Failed to get output as string")
-        .split("\n")
-        .collect::<Vec<&str>>()
-        .into_iter()
-        .filter(|line| line.contains("export"))
-        .collect();
-
-    let key: Vec<_> = result[0].split("\"").collect();
-    set_var("BW_SESSION", key[1]);
-    // TODO: CLEAR ENVIRONMENT VARIABLE
-    // TODO: ZEROIZE PASSWORD
 }
 
 pub fn list_accounts() -> String {

@@ -106,7 +106,7 @@ pub fn ui(f: &mut Frame, app: &App) {
         .style(Style::default());
 
     let hint_text = Paragraph::new(Text::styled(
-        "[Up], [Down] or [K], [J]: Navigate / [Enter]: Select / [Backspace]: Clear / [Q]: Quit",
+        "[Up], [Down] or [K], [J]: Navigate / [Enter]: Select / [Backspace]: Clear / [C]: Copy password / [X]: Clear clipboard / [Q]: Quit",
         Style::default().fg(Color::Green),
     ))
     .block(hint_block);

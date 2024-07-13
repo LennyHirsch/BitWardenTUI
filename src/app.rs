@@ -1,3 +1,4 @@
+use cli_clipboard::{ClipboardContext, ClipboardProvider};
 use rpassword::read_password;
 use std::env::set_var;
 use std::process::{Command, Stdio};
@@ -16,6 +17,7 @@ pub struct App {
     pub accounts: Vec<Account>,
     pub selected: usize,
     pub active_account: Option<Account>,
+    pub pass_copied: bool,
 }
 
 // TODO: fix permissions
@@ -37,6 +39,7 @@ impl App {
             accounts: vec![],
             selected: 0,
             active_account: None,
+            pass_copied: false,
         }
     }
 
@@ -72,6 +75,22 @@ impl App {
 
     pub fn update_active_account(&mut self, index: usize) {
         self.active_account = Some(get_account(&self.accounts[index].id)); // TODO: FIX THIS!
+    }
+
+    pub fn copy_pass(&mut self) {
+        let mut clip = ClipboardContext::new().expect("failed to create ClipboardContext");
+        if let Some(acc) = &self.active_account {
+            if let Some(passwd) = &acc.pass {
+                clip.set_contents(passwd.to_string()).unwrap();
+                self.pass_copied = true;
+            }
+        }
+    }
+
+    pub fn clear_clipboard(&mut self) {
+        let mut clip = ClipboardContext::new().expect("failed to create ClipboardContext");
+        let _ = clip.clear();
+        self.pass_copied = false;
     }
 }
 

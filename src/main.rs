@@ -1,3 +1,4 @@
+use cli_clipboard::{ClipboardContext, ClipboardProvider};
 use cursive::event::Key;
 use ratatui::{
     backend::{Backend, CrosstermBackend},
@@ -59,6 +60,9 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                 },
                 CurrentScreen::Main if key.kind == KeyEventKind::Press => match key.code {
                     KeyCode::Char('q') | KeyCode::Char('Q') => {
+                        if app.pass_copied {
+                            app.clear_clipboard();
+                        }
                         return Ok(true);
                     }
                     KeyCode::Up | KeyCode::Char('k') | KeyCode::Char('K') => {
@@ -76,6 +80,12 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                     }
                     KeyCode::Backspace => {
                         app.active_account = None;
+                    }
+                    KeyCode::Char('c') | KeyCode::Char('C') => {
+                        app.copy_pass();
+                    }
+                    KeyCode::Char('x') | KeyCode::Char('X') => {
+                        app.clear_clipboard();
                     }
                     _ => {}
                 },

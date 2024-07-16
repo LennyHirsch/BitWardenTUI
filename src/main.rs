@@ -1,5 +1,3 @@
-use cli_clipboard::{ClipboardContext, ClipboardProvider};
-use cursive::event::Key;
 use ratatui::{
     backend::{Backend, CrosstermBackend},
     crossterm::{
@@ -15,10 +13,11 @@ use std::{error::Error, io};
 mod app;
 mod ui;
 use crate::{
-    app::{list_accounts, parse_items, Account, App, CurrentScreen},
+    app::{list_items, parse_items, App, CurrentScreen},
     ui::ui,
 };
 
+// fn main() -> Result<(), Box<dyn Error>> {
 fn main() -> Result<(), Box<dyn Error>> {
     // setup terminal
     enable_raw_mode()?;
@@ -54,7 +53,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                     }
                     KeyCode::Enter => {
                         app.unlock();
-                        app.fetch_items(parse_items(list_accounts()));
+                        app.fetch_items(parse_items(list_items(), app.crypto_key.clone()));
                     }
                     _ => {}
                 },
@@ -85,7 +84,9 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                         app.copy_pass();
                     }
                     KeyCode::Char('x') | KeyCode::Char('X') => {
-                        app.clear_clipboard();
+                        if app.pass_copied {
+                            app.clear_clipboard();
+                        }
                     }
                     _ => {}
                 },

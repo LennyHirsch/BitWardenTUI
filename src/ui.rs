@@ -77,18 +77,14 @@ pub fn ui(f: &mut Frame, app: &App) {
             format!("Name: {}", acc.name.clone()),
             Style::default().fg(Color::Yellow),
         ))));
-        if let Some(user) = &acc.user {
-            account_items.push(ListItem::new(Line::from(Span::styled(
-                format!("Username: {}", user.clone()),
-                Style::default().fg(Color::Yellow),
-            ))));
-        }
-        if let Some(pass) = &acc.pass {
-            account_items.push(ListItem::new(Line::from(Span::styled(
-                format!("Password: {}", pass.clone()),
-                Style::default().fg(Color::Yellow),
-            ))));
-        }
+        account_items.push(ListItem::new(Line::from(Span::styled(
+            format!("Username: {}", acc.clone().get_user()),
+            Style::default().fg(Color::Yellow),
+        ))));
+        account_items.push(ListItem::new(Line::from(Span::styled(
+            format!("Password: {}", acc.clone().get_pass()),
+            Style::default().fg(Color::Yellow),
+        ))));
     } else {
         account_items.push(ListItem::new(Line::from(Span::styled(
             format!("No active account to display"),
